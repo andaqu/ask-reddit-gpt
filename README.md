@@ -1,6 +1,6 @@
 # ask-reddit-gpt
 
-AskRedditGPT is a tool that takes in a query, sends it over to Reddit, and returns an answer based on data from the relevant posts and comments found in Reddit.
+AskRedditGPT is a tool that takes in a query, sends it over to Reddit, and returns an answer based on relevant posts/comments.
 
 ## Methodology
 
