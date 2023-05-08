@@ -6,7 +6,6 @@ AskRedditGPT is a tool that takes in a query, sends it over to Reddit, and retur
 
 1. Take in query $q$ from user.
 2. Get $N$ topics from $q$ using GPT.
-3. Determine $S$, which is a set of subreddits best-suited to answer $N$ topics.
-4. Search $q \in S$.
-5. Retrieve a set of segments that can answer $q$.
-6. Summarise segments using GPT and return answer to user.
+3. Determine $C$, which is a set of comments best-suited to answer $N$ topics.
+4. Search $q \in C$.
+5. Use GPT to return an answer to user.
