@@ -21,12 +21,12 @@ class SemanticSearch:
     
     def __call__(self, text, return_data=True):
         inp_emb = self.use([text])
-        neighbors, distances = self.nn.kneighbors(inp_emb, return_distance=True)[0]
+        distances, neighbors = self.nn.kneighbors(inp_emb, return_distance=True)
         
         if return_data:
-            return [self.data[i] for i in neighbors], distances
+            return [self.data[i] for i in neighbors[0]], distances
         else:
-            return neighbors, distances
+            return neighbors[0], distances
     
     
     def get_text_embedding(self, texts, batch=1000):
