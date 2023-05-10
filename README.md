@@ -1,5 +1,5 @@
 ---
-title: Ask Reddit Gpt
+title: Ask Reddit GPT
 emoji: 📜
 colorFrom: gray
 colorTo: pink
