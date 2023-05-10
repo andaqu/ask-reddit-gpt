@@ -1,3 +1,14 @@
+---
+title: Ask Reddit Gpt
+emoji: 🐢
+colorFrom: gray
+colorTo: pink
+sdk: gradio
+sdk_version: 3.29.0
+app_file: app.py
+pinned: false
+---
+
 # ask-reddit-gpt
 
 AskRedditGPT is a tool that takes in a query, sends it over to Reddit, and returns an answer based on relevant posts/comments.
