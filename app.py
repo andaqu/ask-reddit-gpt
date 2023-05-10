@@ -114,7 +114,7 @@ def construct_retriever(comments, k=5):
     return retriever
 
 def construct_bot(retriever):
-    bot = ConversationalRetrievalChain.from_llm(OpenAI(temperature=0), retriever, return_source_documents=True, max_tokens_limit=2000)
+    bot = ConversationalRetrievalChain.from_llm(OpenAI(openai_api_key=openai.api_key, temperature=0), retriever, return_source_documents=True, max_tokens_limit=2000)
     return bot
 
 def get_response(query, chat_history):
