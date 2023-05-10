@@ -7,3 +7,4 @@ tqdm
 tensorflow-hub
 tensorflow-text
 tensorflow
+chromadb
