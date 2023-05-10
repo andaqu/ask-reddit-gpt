@@ -1,6 +1,6 @@
 ---
 title: Ask Reddit Gpt
-emoji: 🐢
+emoji: 📜
 colorFrom: gray
 colorTo: pink
 sdk: gradio
