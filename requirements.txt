@@ -8,4 +8,4 @@ tensorflow-hub
 tensorflow-text
 tensorflow
 chromadb
-tiktokten
+tiktoken
