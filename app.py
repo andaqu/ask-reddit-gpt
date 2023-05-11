@@ -11,11 +11,6 @@ import praw
 import os
 import re
 
-reddit = None
-bot = None
-chat_history = []
-kb = "Bot has no knowledge yet! Please enter an initial query to educate the bot."
-
 embs = TensorflowHubEmbeddings(model_url="https://tfhub.dev/google/universal-sentence-encoder/4")
 
 def set_openai_key(key):
@@ -27,8 +22,6 @@ def set_openai_key(key):
 
 def set_reddit_keys(client_id, client_secret, user_agent):
 
-    global reddit
-
     # If any of the keys are empty, use the environment variables
     if [client_id, client_secret, user_agent] == ["", "", ""]:
         client_id = os.environ.get("REDDIT_CLIENT_ID")
@@ -36,6 +29,8 @@ def set_reddit_keys(client_id, client_secret, user_agent):
         user_agent = os.environ.get("REDDIT_USER_AGENT")
 
     reddit = praw.Reddit(client_id=client_id, client_secret=client_secret, user_agent=user_agent)
+
+    return reddit
 
 def generate_topics(query, model="gpt-3.5-turbo"):
 
@@ -65,9 +60,7 @@ def generate_topics(query, model="gpt-3.5-turbo"):
 
     return topics
 
-def get_relevant_comments(topics):
-
-    global reddit
+def get_relevant_comments(reddit, topics):
 
     comments = []
 
@@ -117,39 +110,32 @@ def construct_bot(retriever):
     bot = ConversationalRetrievalChain.from_llm(OpenAI(openai_api_key=openai.api_key, temperature=0), retriever, return_source_documents=True, max_tokens_limit=2000)
     return bot
 
-def get_response(query, chat_history):
+def get_response(bot, query, chat_history):
+    # Convert chat_history to a list of tuples
+    chat_history = [tuple(chat) for chat in chat_history]
     response = bot({"question": query, "chat_history": chat_history})
     return response
 
 def restart():
-    
-    global chat_history
-    global bot
-
-    chat_history = []
-    bot = None
 
     print("Chat history and bot knowledge has been cleared!")
 
-    return None, "", "Bot has no knowledge yet! Please enter an initial query to educate the bot."
+    return [], "", gr.State(), "Bot has no knowledge yet! Please enter an initial query to educate the bot."
 
-def main(query, openAI_key, reddit_client_id, reddit_client_secret, reddit_user_agent):
-
-    global chat_history
-    global bot
-    global kb
+def main(query, openAI_key, reddit_client_id, reddit_client_secret, reddit_user_agent, chat_history, bot, kb):
 
     set_openai_key(openAI_key)
-    set_reddit_keys(reddit_client_id, reddit_client_secret, reddit_user_agent)
 
     if chat_history == []:
+
+        reddit = set_reddit_keys(reddit_client_id, reddit_client_secret, reddit_user_agent)
 
         print("Bot knowledge has not been initialised yet! Generating topics...")
         topics = generate_topics(query)
         kb = "Bot now has knowledge of the following topics: [" + "".join([f"{i+1}. {topic} " for i, topic in enumerate(topics)]) + "]"
 
         print("Fetching relevant comments...")
-        comments = get_relevant_comments(topics)
+        comments = get_relevant_comments(reddit, topics)
 
         print("Embedding relevant comments...")
         retriever = construct_retriever(comments)
@@ -159,7 +145,7 @@ def main(query, openAI_key, reddit_client_id, reddit_client_secret, reddit_user_
 
         print("Bot has been constructed and is ready to use!")
 
-    response = get_response(query, chat_history)
+    response = get_response(bot, query, chat_history)
 
     answer, source_documents = response["answer"], response["source_documents"]
 
@@ -167,7 +153,7 @@ def main(query, openAI_key, reddit_client_id, reddit_client_secret, reddit_user_
 
     chat_history.append((query, answer))
 
-    return "", kb, chat_history, source_urls
+    return "", kb, chat_history, source_urls, bot
 
 # Testing only!
 
@@ -175,7 +161,7 @@ title = "Ask Reddit GPT 📜"
 
 
 with gr.Blocks() as demo:
-        
+                
         with gr.Group():
             gr.Markdown(f'<center><h1>{title}</h1></center>')
             gr.Markdown(f"Ask Reddit GPT allow you to ask about and chat with information found on Reddit. The tool uses the Reddit API to build a database of knowledge (stored in a Chroma database) and LangChain to query it. For each response, a list of potential sources are sent back. The first query you sent will take a while as it will need to build a knowledge base based on the topics concerning such query. Subsequent queries on the same topic will be much faster. If however, you would like to ask a question concerning other topics, you will need to clear out the knowledge base. To do this, click the 'Restart knowledge base' button below.")
@@ -204,8 +190,9 @@ with gr.Blocks() as demo:
 
         with gr.Group():
 
-            kb = gr.Markdown(kb)
-            chat_bot = gr.Chatbot()
+            kb = gr.Markdown("Bot has no knowledge yet! Please enter an initial query to educate the bot.")
+            chat_history = gr.Chatbot()
+            bot = gr.State()
 
             query = gr.Textbox()
             submit = gr.Button("Submit")
@@ -216,7 +203,7 @@ with gr.Blocks() as demo:
 
             sources = gr.Markdown()
 
-            submit.click(main, [query, openAI_key, reddit_client_id, reddit_client_secret, reddit_user_agent], [query, kb, chat_bot, sources])
-            clear.click(restart, None, [chat_bot, sources, kb], queue=False)
+            submit.click(main, [query, openAI_key, reddit_client_id, reddit_client_secret, reddit_user_agent, chat_history, bot, kb], [query, kb, chat_history, sources, bot])
+            clear.click(restart, None, [chat_history, sources, bot, kb], queue=False)
 
 demo.launch()
