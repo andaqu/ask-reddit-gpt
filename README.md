@@ -43,3 +43,7 @@ Example 3:
 Example 4:
 
 ![Example 4](imgs/e4.png)
+
+Example 5:
+
+![Example 5](imgs/e5.png)

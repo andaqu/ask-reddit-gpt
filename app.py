@@ -153,6 +153,8 @@ def main(query, openAI_key, reddit_client_id, reddit_client_secret, reddit_user_
 
     chat_history.append((query, answer))
 
+    print(query, answer)
+
     return "", kb, chat_history, source_urls, bot
 
 # Testing only!
